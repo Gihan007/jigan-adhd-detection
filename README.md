@@ -1,14 +1,15 @@
-# ADHD Speech-Based Detection System
+# ADHD Speech-Based Detection API
 
-An AI-driven, NLP-based speech screening tool for detecting Attention Deficit Hyperactivity Disorder (ADHD) in Sinhala-speaking children.
+A FastAPI-based REST API for AI-driven speech screening to detect Attention Deficit Hyperactivity Disorder (ADHD) in Sinhala-speaking children.
 
 ## Features
 
-- 🎤 **Audio Recording & Upload** - Record directly in browser or upload audio files
-- 📝 **Age-Appropriate Reading Tasks** - 2-minute Sinhala paragraphs for ages 6-12
+- 🔌 **REST API** - FastAPI-based endpoints for audio analysis
+- 📁 **File Upload** - Accept audio files (WAV, MP3, M4A, FLAC, OGG)
 - 🔊 **Audio Processing** - Automatic format conversion and noise reduction
 - 🧠 **Feature Extraction** - Acoustic (MFCCs, pitch, jitter, shimmer) and linguistic features
 - 📊 **ADHD Classification** - ML-based screening with probability scores
+- 📝 **Speech Transcription** - Automatic transcription using speech recognition
 - 💡 **Recommendations** - Actionable insights based on screening results
 
 ## Prerequisites
@@ -16,7 +17,6 @@ An AI-driven, NLP-based speech screening tool for detecting Attention Deficit Hy
 ### System Requirements
 - Python 3.10 or higher
 - ffmpeg (audio processing)
-- Microphone (for audio recording)
 
 ### Installing ffmpeg
 
@@ -73,31 +73,141 @@ python -m spacy download en_core_web_sm
 python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('punkt_tab')"
 ```
 
-## Usage
+## Running the Application
 
-1. **Start the application**
+### Backend (FastAPI)
+
+1. **Start the API server**
 ```bash
-streamlit run app.py
+# Using uvicorn directly
+uvicorn main:app --reload
+
+# Or run the main.py file
+python main.py
 ```
 
-2. **Access the web interface**
-- Open browser and navigate to `http://localhost:8501`
+**API Documentation:** `http://localhost:8000/docs`
 
-3. **Using the app**
-   - Select child's age (6-12 years)
-   - Read the generated Sinhala paragraph aloud
-   - Either:
-     - **Upload Audio**: Upload a pre-recorded WAV/MP3 file
-     - **Record Audio**: Click "Start Recording" and read the paragraph (recommended: 120 seconds)
-   - View analysis results including ADHD probability and detailed features
+### Frontend (React)
+
+1. **Navigate to frontend directory**
+```bash
+cd frontend
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Start the development server**
+```bash
+npm start
+```
+
+**Frontend URL:** `http://localhost:3000`
+
+### Quick Start (Both Services)
+
+For convenience, you can start both backend and frontend with a single command:
+
+```bash
+python start.py
+```
+
+This will start both servers and provide access URLs.
+
+### Manual Startup
+
+**Terminal 1 (Backend):**
+```bash
+uvicorn main:app --reload
+```
+
+**Terminal 2 (Frontend):**
+```bash
+cd frontend && npm start
+```
+
+The complete application will be available at:
+- **Frontend:** `http://localhost:3000`
+- **API:** `http://localhost:8000`
+- **API Docs:** `http://localhost:8000/docs`
+
+## API Endpoints
+
+### POST /analyze
+Analyze audio file for ADHD indicators.
+
+**Parameters:**
+- `file` (required): Audio file upload (WAV, MP3, M4A, FLAC, OGG)
+- `child_age` (optional): Child's age (6-12, default: 8)
+
+**Example using curl:**
+```bash
+curl -X POST "http://localhost:8000/analyze" \
+     -H "accept: application/json" \
+     -H "Content-Type: multipart/form-data" \
+     -F "file=@audio.wav" \
+     -F "child_age=8"
+```
+
+**Response:**
+```json
+{
+  "child_age": 8,
+  "analysis": {
+    "probability": 0.7234,
+    "classification": "ADHD Indicators Detected",
+    "confidence": "High",
+    "transcription_available": true
+  },
+  "features": {
+    "lexical_diversity": 0.4567,
+    "coherence": 0.5432,
+    "fillers": 3,
+    "pitch_mean": 234.5678,
+    "jitter": 0.0123,
+    "shimmer": 0.0345
+  },
+  "transcription": "මම ගෙදර බල්ලෙක් හදනවා...",
+  "recommendations": {
+    "warning": "This screening suggests potential ADHD indicators.",
+    "note": "This is a screening tool, not a diagnostic test...",
+    "advice": "Early intervention can significantly improve outcomes."
+  }
+}
+```
+
+### GET /health
+Health check endpoint.
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "message": "API is running"
+}
+```
+
+### GET /
+API information endpoint.
 
 ## Project Structure
 
 ```
 jigan/
-├── app.py                          # Main Streamlit application
+├── main.py                        # Main FastAPI application
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # This file
+├── frontend/                       # React frontend application
+│   ├── src/
+│   │   ├── components/            # React components
+│   │   ├── App.js                 # Main React app
+│   │   └── index.js               # React entry point
+│   ├── public/                    # Static assets
+│   ├── package.json               # Frontend dependencies
+│   └── README.md                  # Frontend documentation
 ├── data/                          # Data storage
 │   └── collect_data.py           # Data collection utilities
 ├── models/                        # Trained ML models
@@ -151,13 +261,13 @@ python src/models/train_model.py
 
 ## Troubleshooting
 
-**Audio not recording:**
-- Check microphone permissions in browser
-- Ensure PyAudio is installed correctly
+**API not starting:**
+- Ensure port 8000 is not in use
+- Check for import errors: `python -c "import fastapi; print('FastAPI OK')"`
 
-**ffmpeg not found:**
-- Verify ffmpeg is in system PATH
-- Restart terminal after installation
+**Audio processing errors:**
+- Verify ffmpeg is installed and in PATH
+- Check file format is supported (WAV, MP3, M4A, FLAC, OGG)
 
 **Import errors:**
 - Ensure virtual environment is activated
@@ -165,6 +275,34 @@ python src/models/train_model.py
 
 **SpaCy model not found:**
 - Run: `python -m spacy download en_core_web_sm`
+
+**Large file uploads failing:**
+- Check server upload limits
+- Ensure sufficient disk space for temporary files
+
+## API Testing
+
+Test the API with sample requests:
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# API info
+curl http://localhost:8000/
+
+# Analyze audio (replace with actual file)
+curl -X POST "http://localhost:8000/analyze" \
+     -F "file=@sample_audio.wav" \
+     -F "child_age=8"
+```
+
+## Development
+
+To run in development mode with auto-reload:
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
 ## Contributing
 
