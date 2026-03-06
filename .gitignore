@@ -49,6 +49,7 @@ data/*.mp3
 models/*.pkl
 *.wav
 *.mp3
+training_features.csv
 
 # Logs
 *.log
