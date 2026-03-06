@@ -43,13 +43,7 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Data & Models
-data/*.wav
-data/*.mp3
-models/*.pkl
-*.wav
-*.mp3
-training_features.csv
+
 
 # Logs
 *.log
